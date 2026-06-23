@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useWalkStore } from '@/hooks/useWalkStore'
 import { useAuthStore } from '@/hooks/useAuthStore'
@@ -24,6 +24,7 @@ export default function MapPage() {
   const [walks, setWalks] = useState<WalkCard[]>([])
   const [selectedWalk, setSelectedWalk] = useState<WalkCard | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
+  const mapInitRef = useRef(false)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -51,7 +52,8 @@ export default function MapPage() {
   }, [userLocation])
 
   useEffect(() => {
-    if (!userLocation || mapLoaded) return
+    if (!userLocation || mapLoaded || mapInitRef.current) return
+    mapInitRef.current = true
 
     const script = document.createElement('script')
     script.src = `https://api-maps.yandex.ru/2.1/?apikey=${process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY}&lang=ru_RU`

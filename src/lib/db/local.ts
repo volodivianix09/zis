@@ -33,6 +33,7 @@ function initSchema(db: Database.Database) {
       liveness_passed_at TEXT,
       rating REAL DEFAULT 5.0,
       walk_count INTEGER DEFAULT 0,
+      public_key TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
 
@@ -69,6 +70,8 @@ function initSchema(db: Database.Database) {
       walk_id TEXT NOT NULL REFERENCES walks(id),
       sender_id TEXT NOT NULL REFERENCES profiles(id),
       content TEXT NOT NULL,
+      encrypted_content TEXT,
+      iv TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       is_system INTEGER DEFAULT 0
     );

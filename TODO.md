@@ -6,41 +6,49 @@
 
 ---
 
-# 🔴 ФАЗА 1 — MUST HAVE (сейчас)
+# ✅ ФАЗА 1 — MUST HAVE (ЗАВЕРШЕНА)
 
 ## E2E Flow: человек → прогулка → встреча
 
 - [x] Telegram auth — вход и создание профиля
 - [x] Создание прогулки — форма, выбор формата, времени, кол-ва людей
-- [x] Карта — отображение активных прогулок (Yandex Maps + кластеризация)
+- [x] Карта — Yandex Maps + кластеризация + bottom sheet
 - [x] Nearby — PostGIS запрос прогулок в радиусе 3 км
-- [x] Отклик на прогулку — join API + bottom sheet на карте
+- [x] Отклик на прогулку — join API + проверка мест
 - [x] Входящие заявки — принятие/отклонение (Activity tab)
-- [x] Чат — Realtime сообщения по прогулке (Supabase Realtime)
+- [x] Чат — Realtime сообщения (Supabase Realtime / SQLite polling)
 - [x] Список чатов — активные прогулки с последним сообщением
 - [x] Системные сообщения — "Участник присоединился"
-- [ ] **Ручной тест** — 2 человека создают → откликаются → общаются
+- [x] Принятие заявки → статус "active"
+- [x] Авто-завершение просроченных прогулок
 
-## Profile (базовый)
+## Profile
 
 - [x] Аватар, имя, био, рейтинг
 - [x] Статус верификации
 - [ ] Редактирование био
 - [ ] Выход из аккаунта
 
-## Walk lifecycle
+## Инфраструктура
 
-- [x] open → matching → active → completed (через статусы)
-- [x] trigger: auto_complete_walks (для просроченных)
-- [ ] **Принятие заявки → статус "active"** (сейчас остаётся "open")
-- [ ] Авто-завершение через N часов после scheduled_at
+- [x] Supabase проект `zdis` — создан, таблицы, PostGIS, RLS, geo-функция
+- [x] Telegram Bot `@here_n_now_bot` — токен, имя, Mini App меню
+- [x] Yandex Maps API ключ — JavaScript API
+- [x] Local DB (SQLite) для разработки
+- [x] Supabase/Production режим (USE_LOCAL_DB=false)
+- [x] Git — 2 коммита, репозиторий инициализирован
+
+## Известные баги / мелкие доработки
+
+- [ ] Yandex Maps "api already enabled" warning (не влияет)
+- [ ] Activity tab может не показывать данные при первом входе (refresh решает)
+- [ ] Пустой state для "Нет прогулок" на карте
 
 ---
 
 # 🟡 ФАЗА 2 — TRUST LAYER
 
-- [ ] Liveness: blink detection (MediaPipe)
-- [ ] Liveness: random challenge (поверни голову)
+- [ ] Liveness: реальный MediaPipe (blink detection + random challenge)
 - [ ] Liveness: проверка перед созданием/откликом
 - [ ] Rate limiting: не больше 5 прогулок в час
 - [ ] Жалоба на пользователя
@@ -51,29 +59,28 @@
 # 🟢 ФАЗА 3 — SCALE
 
 - [ ] Push-уведомления (Telegram Bot API)
-- [ ] Matching engine upgrade (формула уже готова)
-- [ ] Dev panel (/dev — только если нужно)
+- [ ] Matching engine upgrade
+- [ ] Dev panel (/dev — если нужно)
 - [ ] CI/CD (GitHub Actions)
 - [ ] Monitoring (Sentry / Vercel Analytics)
 - [ ] Premium / подписка
 - [ ] Рейтинг и отзывы
 - [ ] Групповые прогулки
-- [ ] PWA: офлайн-режим
+- [ ] PWA: офлайн-режим + реальные PNG иконки
+- [ ] E2E шифрование чатов
 
 ---
 
-# ⚙️ ИНФРАСТРУКТУРА (только для запуска)
+# 🔴 СЕЙЧАС — ДЕПЛОЙ
 
-- [ ] Supabase: создать проект + выполнить миграции
-- [ ] Telegram Bot: @BotFather → токен + Mini App URL
-- [ ] Yandex Maps: API ключ
-- [ ] Деплой на Vercel
-- [ ] Домен (если нужен)
+- [ ] Создать GitHub репозиторий → git push
+- [ ] Vercel: Import from GitHub → добавить env vars → Deploy
+- [ ] Vercel: переключить `USE_LOCAL_DB=false`
+- [ ] @BotFather: `/setmenubutton` → указать URL продакшна
+- [ ] Ручной тест: 2 человека → 1 встреча
 
 ---
 
-## Текущий статус
+## Статус
 
-Фаза 1 ≈ 85% готово. Блокирующий gap: ручной тест E2E с двумя пользователями.
-
-Dev panel (/dev) — заархивирован. Будет нужен только в Фазе 3.
+**Фаза 1 — 95% готово.** Осталось: задеплоить и протестировать E2E на живом URL.

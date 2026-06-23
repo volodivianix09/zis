@@ -136,7 +136,7 @@ export async function getSharedKeyForWalk(
     .eq('status', 'accepted')
     .neq('user_id', user.id)
 
-  const participants = (data || []) as ParticipantWithProfile[]
+  const participants = (data || []) as unknown as ParticipantWithProfile[]
   if (participants.length === 0) {
     throw new Error('No participants found for walk')
   }

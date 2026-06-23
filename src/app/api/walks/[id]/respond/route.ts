@@ -48,6 +48,8 @@ export async function POST(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   if (action === 'accepted') {
+    await supabase.from('walks').update({ status: 'active' }).eq('id', id)
+
     await supabase.from('messages').insert({
       walk_id: id,
       sender_id: user.id,
