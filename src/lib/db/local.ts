@@ -82,6 +82,24 @@ function initSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_messages_walk ON messages(walk_id);
     CREATE INDEX IF NOT EXISTS idx_participants_user ON walk_participants(user_id);
     CREATE INDEX IF NOT EXISTS idx_participants_walk ON walk_participants(walk_id);
+    CREATE TABLE IF NOT EXISTS rate_limits (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      user_id TEXT NOT NULL,
+      action TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_rate_limits_lookup ON rate_limits(user_id, action, created_at);
+    CREATE TABLE IF NOT EXISTS complaints (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      walk_id TEXT NOT NULL REFERENCES walks(id),
+      complainant_id TEXT NOT NULL REFERENCES profiles(id),
+      accused_id TEXT NOT NULL REFERENCES profiles(id),
+      reason TEXT NOT NULL,
+      description TEXT,
+      status TEXT DEFAULT 'pending' CHECK(status IN ('pending','reviewed','dismissed')),
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_complaints_accused ON complaints(accused_id, status);
   `)
 }
 
@@ -354,4 +372,44 @@ export function seedTestData() {
     d.prepare(`INSERT INTO walk_participants (walk_id, user_id, role, status, liveness_verified) VALUES (?, ?, 'creator', 'accepted', 1)`)
       .run(walkId, i % 2 === 0 ? user1Id : user2Id)
   }
+}
+
+export function checkRateLimit(
+  userId: string,
+  action: string,
+  windowMs: number,
+  maxActions: number
+): { allowed: boolean; remaining: number; resetAt: Date } {
+  const d = getDb()
+  const since = new Date(Date.now() - windowMs).toISOString()
+  const row = d.prepare(
+    "SELECT COUNT(*) as c FROM rate_limits WHERE user_id = ? AND action = ? AND created_at >= ?"
+  ).get(userId, action, since) as any
+  const currentCount = row?.c || 0
+  return {
+    allowed: currentCount < maxActions,
+    remaining: Math.max(0, maxActions - currentCount),
+    resetAt: new Date(Date.now() + windowMs),
+  }
+}
+
+export function recordRateAction(userId: string, action: string): void {
+  const d = getDb()
+  const id = uuid()
+  d.prepare("INSERT INTO rate_limits (id, user_id, action) VALUES (?, ?, ?)")
+    .run(id, userId, action)
+}
+export function createComplaint(
+  walkId: string,
+  complainantId: string,
+  accusedId: string,
+  reason: string,
+  description?: string
+) {
+  const d = getDb()
+  const id = uuid()
+  d.prepare(
+    "INSERT INTO complaints (id, walk_id, complainant_id, accused_id, reason, description) VALUES (?, ?, ?, ?, ?, ?)"
+  ).run(id, walkId, complainantId, accusedId, reason, description || null)
+  return { id }
 }

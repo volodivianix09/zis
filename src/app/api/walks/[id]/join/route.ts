@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isLocal } from '@/lib/db'
 import * as local from '@/lib/db/local'
+import { checkRateLimit, recordAction } from '@/lib/rate-limit'
 
 export async function POST(
   request: NextRequest,
@@ -9,14 +10,24 @@ export async function POST(
   const { id } = await params
 
   if (isLocal()) {
-    const result = local.joinWalk(id, 'dev-user')
+    const rateCheck = await checkRateLimit("dev-user", "join_walk")
+    if (!rateCheck.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    }
+    const result = local.joinWalk(id, "dev-user")
     if (result.error) return NextResponse.json(result, { status: 400 })
+    recordAction("dev-user", "join_walk")
     return NextResponse.json(result)
   }
 
   const supabase = await (await import('@/lib/supabase/server')).createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rateCheck = await checkRateLimit(user.id, "join_walk")
+  if (!rateCheck.allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+  }
 
   const { data: walk } = await supabase
     .from('walks').select('*').eq('id', id).single()
@@ -42,5 +53,6 @@ export async function POST(
   })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  recordAction(user.id, "join_walk")
   return NextResponse.json({ success: true })
 }
