@@ -9,7 +9,7 @@ import type { Walk, WalkParticipant } from '@/types'
 
 interface ChatWalk extends Walk {
   participants: (WalkParticipant & { profile: { display_name: string; avatar_url: string | null } })[]
-  last_message?: { content: string; created_at: string }
+  last_message?: { content: string; created_at: string; is_system: boolean }
 }
 
 export default function ChatsPage() {
@@ -50,7 +50,7 @@ export default function ChatsPage() {
       for (const walk of walks) {
         const { data: lastMsg } = await supabase
           .from('messages')
-          .select('content, created_at')
+          .select('content, created_at, is_system')
           .eq('walk_id', walk.id)
           .order('created_at', { ascending: false })
           .limit(1)

@@ -1,0 +1,6 @@
+Vercel CLI 54.15.1 (Node.js 24.14.0)
+
+  Directory       C:\ZIS\zis
+
+Loading teamsтАж
+Error: The specified token is not valid. Use `vercel login` to generate a new token.

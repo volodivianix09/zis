@@ -1,0 +1,49 @@
+
+> zis@0.1.0 build
+> next build
+
+тЦ▓ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+тЬУ Compiled successfully in 2.9s
+  Running TypeScript ...
+  Finished TypeScript in 3.0s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/21) ...
+  Generating static pages using 11 workers (5/21) 
+  Generating static pages using 11 workers (10/21) 
+  Generating static pages using 11 workers (15/21) 
+тЬУ Generating static pages using 11 workers (21/21) in 440ms
+  Finalizing page optimization ...
+
+Route (app)
+тФМ тЧЛ /
+тФЬ тЧЛ /_not-found
+тФЬ тЧЛ /activity
+тФЬ ╞Т /api/auth/telegram
+тФЬ ╞Т /api/chats/[walkId]
+тФЬ ╞Т /api/dev/db
+тФЬ ╞Т /api/dev/stats
+тФЬ ╞Т /api/dev/walks/cleanup
+тФЬ ╞Т /api/dev/walks/expire
+тФЬ ╞Т /api/dev/walks/mock
+тФЬ ╞Т /api/liveness/challenge
+тФЬ ╞Т /api/liveness/verify
+тФЬ ╞Т /api/walks
+тФЬ ╞Т /api/walks/[id]
+тФЬ ╞Т /api/walks/[id]/join
+тФЬ ╞Т /api/walks/nearby
+тФЬ тЧЛ /chats
+тФЬ ╞Т /chats/[id]
+тФЬ тЧЛ /dev
+тФЬ тЧЛ /dev/api
+тФЬ тЧЛ /dev/db
+тФЬ тЧЛ /dev/walks
+тФЬ тЧЛ /profile
+тФФ тЧЛ /walk/create
+
+
+тЧЛ  (Static)   prerendered as static content
+╞Т  (Dynamic)  server-rendered on demand
+

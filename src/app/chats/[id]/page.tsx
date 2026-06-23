@@ -12,7 +12,7 @@ export default function ChatPage() {
   const params = useParams()
   const walkId = params.id as string
   const { user } = useAuthStore()
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<any[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -26,9 +26,7 @@ export default function ChatPage() {
         .eq('walk_id', walkId)
         .order('created_at', { ascending: true })
 
-      if (data) {
-        setMessages(data)
-      }
+      if (data) setMessages(data)
       setIsLoading(false)
     }
 
@@ -37,23 +35,13 @@ export default function ChatPage() {
     const supabase = createClient()
     const channel = supabase
       .channel(`chat:${walkId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `walk_id=eq.${walkId}`,
-        },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message])
-        }
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `walk_id=eq.${walkId}` },
+        (payload) => setMessages((prev) => [...prev, payload.new as Message])
       )
       .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [walkId])
 
   useEffect(() => {
@@ -95,27 +83,13 @@ export default function ChatPage() {
         {messages.map((msg) => {
           const isOwn = msg.sender_id === user?.id
           return (
-            <div
-              key={msg.id}
-              className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[75%] px-4 py-2 rounded-2xl ${
-                  isOwn
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
-                }`}
-              >
+            <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[75%] px-4 py-2 rounded-2xl ${
+                isOwn ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
+              }`}>
                 <p>{msg.content}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    isOwn ? 'text-blue-100' : 'text-gray-500'
-                  }`}
-                >
-                  {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                <p className={`text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
+                  {new Date(msg.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>

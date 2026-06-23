@@ -1,0 +1,4 @@
+Vercel CLI 54.15.1 (Node.js 24.14.0)
+> 
+  Visit https://vercel.com/oauth/device?user_code=RZSG-JKWT
+

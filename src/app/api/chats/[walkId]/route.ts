@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isLocal } from '@/lib/db'
 import * as local from '@/lib/db/local'
 
+// POST is deprecated — client now writes directly to Supabase with E2E encryption
+// This endpoint is kept for backward compatibility only
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ walkId: string }> }
@@ -16,6 +18,7 @@ export async function POST(
     return NextResponse.json({ message })
   }
 
+  // Server-side messages are marked as system messages (not encrypted)
   const supabase = await (await import('@/lib/supabase/server')).createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -30,9 +33,15 @@ export async function POST(
 
   if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
 
+  // System messages (e.g., "user joined") are stored as plaintext
   const { data: message, error } = await supabase
     .from('messages')
-    .insert({ walk_id: walkId, sender_id: user.id, content: content.trim() })
+    .insert({
+      walk_id: walkId,
+      sender_id: user.id,
+      content: content.trim(),
+      is_system: true,
+    })
     .select()
     .single()
 

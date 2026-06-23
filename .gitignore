@@ -34,12 +34,15 @@ yarn-error.log*
 .env*
 
 # local dev
-.local.db
+*.local.db
+*.local.db-shm
+*.local.db-wal
 .server.log
 .server-err.txt
 .server-log.txt
 build-output.txt
 .tmp_geo_fn.sql
+.playwright-mcp/
 
 # vercel
 .vercel
