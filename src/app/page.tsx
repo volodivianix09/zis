@@ -27,6 +27,7 @@ export default function MapPage() {
   const mapInitRef = useRef(false)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const loadingTimeoutRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -57,43 +58,62 @@ export default function MapPage() {
 
     const script = document.createElement('script')
     script.src = `https://api-maps.yandex.ru/2.1/?apikey=${process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY}&lang=ru_RU`
+    loadingTimeoutRef.current = setTimeout(() => {
+      setMapLoaded(true)
+    }, 15000)
+
     script.onload = () => {
       const ymaps = (window as any).ymaps
-      ymaps.ready(() => {
-        const map = new ymaps.Map('map', {
-          center: [userLocation.lat, userLocation.lng],
-          zoom: 14,
-          controls: ['zoomControl'],
-        })
-
-        const clusterer = new ymaps.Clusterer({ preset: 'islands#invertedBlueClusterIcons' })
-        const placemarks = walks.map((walk, idx) => {
-          const pm = new ymaps.Placemark(
-            [walk.lat || walk.location?.lat, walk.lng || walk.location?.lng],
-            { balloonContent: walk.title },
-            { preset: 'islands#blueCircleDotIcon' }
-          )
-          pm.events.add('click', () => setSelectedWalk(walks[idx]))
-          return pm
-        })
-
-        clusterer.add(placemarks)
-        map.geoObjects.add(clusterer)
-
-        if (userLocation) {
-          const myPos = new ymaps.Placemark(
-            [userLocation.lat, userLocation.lng],
-            { hintContent: 'Вы здесь' },
-            { preset: 'islands#blueCircleIcon' }
-          )
-          map.geoObjects.add(myPos)
-        }
-
+      if (!ymaps) {
+        setError('Не удалось загрузить Яндекс.Карты')
         setMapLoaded(true)
+        return
+      }
+      ymaps.ready(() => {
+        try {
+          const map = new ymaps.Map('map', {
+            center: [userLocation.lat, userLocation.lng],
+            zoom: 14,
+            controls: ['zoomControl'],
+          })
+
+          const clusterer = new ymaps.Clusterer({ preset: 'islands#invertedBlueClusterIcons' })
+          const placemarks = walks.map((walk, idx) => {
+            const pm = new ymaps.Placemark(
+              [walk.lat || walk.location?.lat, walk.lng || walk.location?.lng],
+              { balloonContent: walk.title },
+              { preset: 'islands#blueCircleDotIcon' }
+            )
+            pm.events.add('click', () => setSelectedWalk(walks[idx]))
+            return pm
+          })
+
+          clusterer.add(placemarks)
+          map.geoObjects.add(clusterer)
+
+          if (userLocation) {
+            const myPos = new ymaps.Placemark(
+              [userLocation.lat, userLocation.lng],
+              { hintContent: 'Вы здесь' },
+              { preset: 'islands#blueCircleIcon' }
+            )
+            map.geoObjects.add(myPos)
+          }
+
+          setMapLoaded(true)
+        } catch (e) {
+          setError('Ошибка при инициализации карты')
+          setMapLoaded(true)
+        }
       })
     }
-    script.onerror = () => setError('Не удалось загрузить карту. Проверьте API ключ.')
+    script.onerror = () => {
+      setError('Не удалось загрузить карту. Проверьте API ключ.')
+      setMapLoaded(true)
+    }
     document.head.appendChild(script)
+
+    return () => clearTimeout(loadingTimeoutRef.current)
   }, [userLocation, walks, mapLoaded])
 
   const handleJoin = async (walkId: string) => {
