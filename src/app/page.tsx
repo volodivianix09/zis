@@ -27,7 +27,7 @@ export default function MapPage() {
   const mapInitRef = useRef(false)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const loadingTimeoutRef = useRef<NodeJS.Timeout>()
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
     if (navigator.geolocation) {

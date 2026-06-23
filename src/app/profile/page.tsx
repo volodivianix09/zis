@@ -33,7 +33,7 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-bold mb-6">Профиль</h1>
         <div className="bg-gray-100 rounded-lg p-8 text-center">
           <User className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-          <p className="text-gray-600">Войдите через Telegram</p>
+          <a href="/login" className="mt-2 inline-block px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">Войти</a>
         </div>
       </div>
     )
