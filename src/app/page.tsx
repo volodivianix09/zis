@@ -27,18 +27,25 @@ export default function MapPage() {
   const mapInitRef = useRef(false)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [geoError, setGeoError] = useState(false)
   const loadingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
+    retryGeolocation()
+  }, [setUserLocation])
+
+  const retryGeolocation = () => {
+    setGeoError(false)
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => setUserLocation({ lat: 55.7558, lng: 37.6173 })
+        () => { setGeoError(true); setUserLocation({ lat: 55.7558, lng: 37.6173 }) }
       )
     }
-  }, [setUserLocation])
+  }
 
-  useEffect(() => {
+
+    useEffect(() => {
     if (!userLocation) return
 
     const fetchWalks = async () => {
@@ -145,7 +152,19 @@ export default function MapPage() {
         </div>
       )}
 
-      {error && (
+            {geoError && (
+        <div className="absolute top-16 left-4 right-4 z-20 bg-amber-50 border border-amber-200 rounded-lg p-3 shadow-lg">
+          <p className="text-sm text-amber-800 mb-2">Не удалось определить местоположение. Показан центр Москвы.</p>
+          <button
+            onClick={retryGeolocation}
+            className="px-4 py-1.5 bg-amber-600 text-white text-sm rounded-lg hover:bg-amber-700 transition-colors"
+          >
+            Повторить
+          </button>
+        </div>
+      )}
+
+{error && (
         <div className="absolute top-4 left-4 right-4 z-20 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
           {error}
         </div>

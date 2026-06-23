@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils'
 
 const tabs = [
   { href: '/chats', label: 'Чаты', icon: MessageCircle },
-  { href: '/activity', label: 'Активность', icon: Activity },
   { href: '/', label: 'Карта', icon: Map },
+  { href: '/activity', label: 'Активность', icon: Activity },
   { href: '/profile', label: 'Профиль', icon: User },
 ]
 
