@@ -24,7 +24,6 @@ export default function MapPage() {
   const [walks, setWalks] = useState<WalkCard[]>([])
   const [selectedWalk, setSelectedWalk] = useState<WalkCard | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
-  const mapInitRef = useRef(false)
   const [joining, setJoining] = useState(false)
   const [formatFilter, setFormatFilter] = useState<string>('all')
   const [error, setError] = useState<string | null>(null)
@@ -62,9 +61,10 @@ export default function MapPage() {
   }, [userLocation])
 
   useEffect(() => {
-    if (!userLocation || mapLoaded || mapInitRef.current) return
-    mapInitRef.current = true
+    if (!userLocation || mapLoaded) return
 
+    if ((window as any).ymaps) return
+    if (document.querySelector('script[src*="api-maps.yandex.ru"]')) return
     const script = document.createElement('script')
     script.src = `https://api-maps.yandex.ru/2.1/?apikey=${process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY}&lang=ru_RU`
     loadingTimeoutRef.current = setTimeout(() => {
