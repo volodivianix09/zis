@@ -58,12 +58,14 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    if (!user || !isAuthenticated) {
-      setLoadingData(false)
-      return
-    }
+    let cancelled = false
 
     const fetchData = async () => {
+      if (!user || !isAuthenticated) {
+        if (!cancelled) setLoadingData(false)
+        return
+      }
+
       const { data: myWalks } = await supabase
         .from('walks')
         .select('*')
@@ -74,15 +76,17 @@ export default function ProfilePage() {
         const active: WalkCard[] = []
         const history: WalkCard[] = []
 
-        for (const w of myWalks as any[]) {
+        interface RawWalk { id: string; title: string; format: string; district: string | null; status: string; current_count: number; max_people: number; scheduled_at: string; creator_id: string; }
+
+        for (const raw of myWalks as RawWalk[]) {
           const card: WalkCard = {
-            id: w.id, title: w.title, format: w.format, district: w.district,
-            status: w.status, current_count: w.current_count, max_people: w.max_people,
-            scheduled_at: w.scheduled_at, creator_id: w.creator_id,
+            id: raw.id, title: raw.title, format: raw.format, district: raw.district,
+            status: raw.status, current_count: raw.current_count, max_people: raw.max_people,
+            scheduled_at: raw.scheduled_at, creator_id: raw.creator_id,
           }
 
-          if (w.status === 'open' || w.status === 'matching') active.push(card)
-          else if (w.status === 'completed' || w.status === 'cancelled') history.push(card)
+          if (raw.status === 'open' || raw.status === 'matching') active.push(card)
+          else if (raw.status === 'completed' || raw.status === 'cancelled') history.push(card)
         }
 
         setActiveWalks(active)
@@ -97,17 +101,21 @@ export default function ProfilePage() {
         .limit(10)
 
       if (myReviews) {
-        setReviews(myReviews.map((r: any) => ({
-          id: r.id, rating: r.rating, comment: r.comment,
-          created_at: r.created_at, reviewer_name: r.reviewer?.display_name,
+        setReviews(myReviews.map((r: Record<string, unknown>) => ({
+          id: r.id as string,
+          rating: r.rating as number,
+          comment: r.comment as string | null,
+          created_at: r.created_at as string,
+          reviewer_name: (r.reviewer as Record<string, string> | null)?.display_name,
         })))
       }
 
-      setLoadingData(false)
+      if (!cancelled) setLoadingData(false)
     }
 
     fetchData()
-  }, [user, isAuthenticated])
+    return () => { cancelled = true }
+  }, [user, isAuthenticated, supabase])
 
   if (!isAuthenticated || !user) {
     return (

@@ -1,19 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTelegram } from '@/lib/telegram/useTelegram'
+import { useAuthStore } from '@/hooks/useAuthStore'
 import { LogIn, Mail, Lock, ExternalLink, CheckCircle, Send } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
   const { user: tgUser } = useTelegram()
+  const { isAuthenticated, isLoading } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const isTelegram = typeof window !== 'undefined' && !!window.Telegram?.WebApp
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) router.push('/')
+  }, [isAuthenticated, isLoading, router])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,42 +55,6 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-  if (isTelegram) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-sm text-center">
-          <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-5 shadow-lg">
-            <span className="text-3xl text-white font-bold">
-              {tgUser?.first_name?.[0] || '?'}
-            </span>
-          </div>
-
-          <h1 className="text-2xl font-bold mb-1">
-            {tgUser?.first_name || 'Пользователь'}
-          </h1>
-          {tgUser?.username && (
-            <p className="text-gray-500 mb-6">@{tgUser.username}</p>
-          )}
-
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
-            <p className="text-sm text-green-800">
-              Вы авторизованы через Telegram
-            </p>
-          </div>
-
-          <button
-            onClick={() => router.push('/profile')}
-            className="w-full bg-blue-600 text-white rounded-xl py-3.5 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <LogIn className="w-5 h-5" />
-            Перейти в профиль
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 to-white">
       <div className="w-full max-w-sm">
@@ -95,6 +65,32 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold">Здесь и сейчас</h1>
           <p className="text-gray-500 mt-1">Найди компанию для прогулки</p>
         </div>
+
+        {isTelegram && tgUser && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center shrink-0">
+              <span className="text-white font-bold">{tgUser.first_name?.[0] || '?'}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-green-900">{tgUser.first_name}</p>
+              <p className="text-xs text-green-700 flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" /> Telegram
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/profile')}
+              className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors shrink-0"
+            >
+              Профиль
+            </button>
+          </div>
+        )}
+
+        {isTelegram && !tgUser && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-center">
+            <p className="text-blue-700 text-sm">Загрузка данных Telegram...</p>
+          </div>
+        )}
 
         <a
           href="https://t.me/here_n_now_bot"
