@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/hooks/useAuthStore'
+import { usePWA } from '@/hooks/usePWA'
 import { User, Star, Shield, Check, X, LogOut, Smartphone, MapPin, Clock, Calendar, ChevronRight, Camera, Settings, Info } from 'lucide-react'
 import { WALK_FORMATS } from '@/lib/constants'
 
@@ -37,6 +38,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [showInstall, setShowInstall] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const { installPrompt, install } = usePWA()
   const [activeWalks, setActiveWalks] = useState<WalkCard[]>([])
   const [historyWalks, setHistoryWalks] = useState<WalkCard[]>([])
   const [reviews, setReviews] = useState<ReviewCard[]>([])
@@ -227,10 +229,13 @@ export default function ProfilePage() {
         <div className="px-4 mt-4 space-y-3 animate-fadeIn">
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm divide-y divide-gray-50 overflow-hidden">
             <SettingsRow icon={<Shield className="w-4 h-4" />} label="Верификация" value={user.is_verified ? 'Подтверждён' : 'Не подтверждён'} color={user.is_verified ? 'text-green-600' : 'text-gray-400'} />
-            <SettingsRow icon={<Smartphone className="w-4 h-4" />} label="На экран домой" onClick={() => setShowInstall(!showInstall)} />
+            <SettingsRow icon={<Smartphone className="w-4 h-4" />} label="На экран домой" onClick={installPrompt ? install : () => setShowInstall(!showInstall)} />
             {showInstall && (
               <div className="px-4 py-3 bg-blue-50 text-sm text-blue-800">
-                Нажмите ⋮ → «Добавить на главный экран»
+                {isTelegram && 'Нажмите ⋮ в правом углу Telegram → «Добавить на главный экран»'}
+                {!isTelegram && isIOS && !isStandalone && 'Нажмите ⌕ (поделиться) в Safari → «На экран домой»'}
+                {!isTelegram && isAndroid && !installPrompt && 'Откройте меню браузера (⋮) → «Добавить на главный экран»'}
+                {!isTelegram && !isIOS && !isAndroid && 'Установите приложение через браузер на телефоне'}
               </div>
             )}
             <SettingsRow icon={<Info className="w-4 h-4" />} label="О приложении" value="v0.1.0" />

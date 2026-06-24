@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { AuthProvider } from '@/components/AuthProvider'
+import { PWAProvider } from '@/components/PWAProvider'
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] })
 
@@ -32,10 +33,12 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <main className="pb-20 min-h-screen">
-            {children}
-          </main>
-          <BottomNav />
+          <PWAProvider>
+            <main className="pb-20 min-h-screen">
+              {children}
+            </main>
+            <BottomNav />
+          </PWAProvider>
         </AuthProvider>
       </body>
     </html>
