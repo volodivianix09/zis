@@ -2,13 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Map, Activity, MessageCircle, User, Compass } from 'lucide-react'
+import { Map, Activity, MessageCircle, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const tabs = [
   { href: '/chats', label: 'Чаты', icon: MessageCircle },
   { href: '/', label: 'Карта', icon: Map },
-  { href: '/swipe', label: 'Свайп', icon: Compass },
   { href: '/activity', label: 'Активность', icon: Activity },
   { href: '/profile', label: 'Профиль', icon: User },
 ]
