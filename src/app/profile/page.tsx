@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/hooks/useAuthStore'
 import { createClient } from '@/lib/supabase/client'
-import { User, Star, Shield, Pencil, Check, X, LogOut } from 'lucide-react'
+import { SettingsPanel } from '@/components/SettingsPanel'
+import { User, Star, Shield, Pencil, Check, X, LogOut, Settings, Smartphone } from 'lucide-react'
 
 export default function ProfilePage() {
   const { user, isAuthenticated, logout, setUser } = useAuthStore()
   const [editingBio, setEditingBio] = useState(false)
   const [bioText, setBioText] = useState(user?.bio || '')
   const [saving, setSaving] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const saveBio = async () => {
     if (!user) return
@@ -122,6 +124,22 @@ export default function ProfilePage() {
         </div>
 
         <button
+          onClick={() => setSettingsOpen(true)}
+          className="p-4 flex items-center gap-3 w-full text-left text-gray-700 hover:bg-gray-50"
+        >
+          <Settings className="w-5 h-5" />
+          <span>Настройки</span>
+        </button>
+
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="p-4 flex items-center gap-3 w-full text-left text-gray-700 hover:bg-gray-50"
+        >
+          <Smartphone className="w-5 h-5" />
+          <span>Добавить на экран домой</span>
+        </button>
+
+        <button
           onClick={logout}
           className="p-4 flex items-center gap-3 w-full text-left text-red-600 hover:bg-red-50"
         >
@@ -129,6 +147,8 @@ export default function ProfilePage() {
           <span>Выйти</span>
         </button>
       </div>
+
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </div>
   )
 }

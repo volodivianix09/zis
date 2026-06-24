@@ -30,6 +30,11 @@ declare global {
           show: () => void
           hide: () => void
         }
+        SettingsButton: {
+          onClick: (cb: () => void) => void
+          show: () => void
+          hide: () => void
+        }
         HapticFeedback: {
           impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void
@@ -78,6 +83,7 @@ export function useTelegram() {
     viewportHeight: tg?.viewportHeight || 0,
     MainButton: tg?.MainButton,
     BackButton: tg?.BackButton,
+    SettingsButton: tg?.SettingsButton,
     HapticFeedback: tg?.HapticFeedback,
   }
 }

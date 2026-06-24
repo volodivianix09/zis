@@ -1,15 +1,33 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useAuthStore } from '@/hooks/useAuthStore'
 import { useTelegram } from '@/lib/telegram/useTelegram'
+import { useSettingsStore } from '@/hooks/useSettingsStore'
 import { createClient } from '@/lib/supabase/client'
+import { SettingsPanel } from './SettingsPanel'
 
 const IS_LOCAL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+const IS_TELEGRAM = typeof window !== 'undefined' && !!window.Telegram?.WebApp
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user: tgUser, isReady } = useTelegram()
+  const { user: tgUser, isReady, SettingsButton } = useTelegram()
   const { setUser, setLoading } = useAuthStore()
+  const { theme } = useSettingsStore()
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsBtnRef = useRef(false)
+
+  useEffect(() => {
+    if (IS_TELEGRAM && SettingsButton && !settingsBtnRef.current) {
+      settingsBtnRef.current = true
+      SettingsButton.onClick(() => setSettingsOpen(true))
+      SettingsButton.show()
+    }
+  }, [SettingsButton])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
 
   useEffect(() => {
     const initAuth = async () => {
@@ -90,5 +108,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [setUser])
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+    </>
+  )
 }
