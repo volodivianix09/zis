@@ -3,15 +3,14 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/hooks/useAuthStore'
 import { createClient } from '@/lib/supabase/client'
-import { SettingsPanel } from '@/components/SettingsPanel'
-import { User, Star, Shield, Pencil, Check, X, LogOut, Settings, Smartphone } from 'lucide-react'
+import { User, Star, Shield, Pencil, Check, X, LogOut, Smartphone } from 'lucide-react'
 
 export default function ProfilePage() {
   const { user, isAuthenticated, logout, setUser } = useAuthStore()
   const [editingBio, setEditingBio] = useState(false)
   const [bioText, setBioText] = useState(user?.bio || '')
   const [saving, setSaving] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [showInstall, setShowInstall] = useState(false)
 
   const saveBio = async () => {
     if (!user) return
@@ -123,21 +122,23 @@ export default function ProfilePage() {
           </span>
         </div>
 
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="p-4 flex items-center gap-3 w-full text-left text-gray-700 hover:bg-gray-50"
-        >
-          <Settings className="w-5 h-5" />
-          <span>Настройки</span>
-        </button>
+        {typeof window !== 'undefined' && !!window.Telegram?.WebApp && (
+          <button
+            onClick={() => setShowInstall(!showInstall)}
+            className="p-4 flex items-center gap-3 w-full text-left text-gray-700 hover:bg-gray-50"
+          >
+            <Smartphone className="w-5 h-5" />
+            <span>На экран домой</span>
+          </button>
+        )}
 
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="p-4 flex items-center gap-3 w-full text-left text-gray-700 hover:bg-gray-50"
-        >
-          <Smartphone className="w-5 h-5" />
-          <span>Добавить на экран домой</span>
-        </button>
+        {showInstall && (
+          <div className="px-4 pb-3">
+            <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-900">
+              Нажмите ⋮ (три точки) в правом верхнем углу, затем выберите «Добавить на главный экран»
+            </div>
+          </div>
+        )}
 
         <button
           onClick={logout}
@@ -147,8 +148,6 @@ export default function ProfilePage() {
           <span>Выйти</span>
         </button>
       </div>
-
-      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </div>
   )
 }
