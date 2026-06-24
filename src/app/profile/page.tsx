@@ -39,6 +39,10 @@ export default function ProfilePage() {
   const [showInstall, setShowInstall] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const { installPrompt, install } = usePWA()
+  const isTelegram = typeof window !== 'undefined' && !!window.Telegram?.WebApp
+  const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const isAndroid = typeof window !== 'undefined' && /Android/.test(navigator.userAgent)
+  const isStandalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches
   const [activeWalks, setActiveWalks] = useState<WalkCard[]>([])
   const [historyWalks, setHistoryWalks] = useState<WalkCard[]>([])
   const [reviews, setReviews] = useState<ReviewCard[]>([])
