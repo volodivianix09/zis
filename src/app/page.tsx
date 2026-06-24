@@ -26,8 +26,10 @@ export default function MapPage() {
   const [mapLoaded, setMapLoaded] = useState(false)
   const mapInitRef = useRef(false)
   const [joining, setJoining] = useState(false)
+  const [formatFilter, setFormatFilter] = useState<string>('all')
   const [error, setError] = useState<string | null>(null)
   const [geoError, setGeoError] = useState(false)
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('map')
   const loadingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
@@ -183,6 +185,35 @@ export default function MapPage() {
         </div>
       )}
 
+            {viewMode === 'list' && (
+        <div className="absolute inset-0 z-10 pt-20 pb-32 overflow-y-auto bg-white">
+          <div className="px-4 space-y-2">
+            {walks.filter(w => formatFilter === 'all' || w.format === formatFilter).map(walk => (
+              <button
+                key={walk.id}
+                onClick={() => setSelectedWalk(walk)}
+                className="w-full bg-white border rounded-xl p-4 text-left hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">{WALK_FORMATS[walk.format as keyof typeof WALK_FORMATS]?.emoji || '🚶'}</span>
+                  <h3 className="font-semibold">{walk.title}</h3>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  {walk.district && <span>{walk.district}</span>}
+                  <span>{walk.current_count}/{walk.max_people}</span>
+                  <span>{new Date(walk.scheduled_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+                  {walk.distance_km && <span>{walk.distance_km.toFixed(1)} км</span>}
+                </div>
+              </button>
+            ))}
+            {walks.filter(w => formatFilter === 'all' || w.format === formatFilter).length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <p>Нет подходящих прогулок</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       {selectedWalk && (
         <div className="absolute bottom-0 left-0 right-0 z-30 bg-white rounded-t-2xl shadow-2xl animate-slide-up">
           <div className="flex items-center justify-between p-4 border-b">
