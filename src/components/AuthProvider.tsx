@@ -6,6 +6,7 @@ import { useTelegram } from '@/lib/telegram/useTelegram'
 import { useSettingsStore } from '@/hooks/useSettingsStore'
 import { createClient } from '@/lib/supabase/client'
 import { SettingsPanel } from './SettingsPanel'
+import { Settings } from 'lucide-react'
 
 const IS_LOCAL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
 const IS_TELEGRAM = typeof window !== 'undefined' && !!window.Telegram?.WebApp
@@ -111,6 +112,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+      <button
+        onClick={() => setSettingsOpen(true)}
+        className="fixed top-4 right-4 z-40 w-9 h-9 bg-white/80 backdrop-blur rounded-full shadow flex items-center justify-center hover:bg-white transition-colors"
+        aria-label="Настройки"
+      >
+        <Settings className="w-5 h-5 text-gray-700" />
+      </button>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </>
   )
