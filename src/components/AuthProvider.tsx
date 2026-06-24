@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/hooks/useAuthStore'
 import { useTelegram } from '@/lib/telegram/useTelegram'
 import { useSettingsStore } from '@/hooks/useSettingsStore'
 import { createClient } from '@/lib/supabase/client'
 import { SettingsPanel } from './SettingsPanel'
+import { Smartphone, Settings } from 'lucide-react'
 
 const IS_LOCAL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
 const IS_TELEGRAM = typeof window !== 'undefined' && !!window.Telegram?.WebApp
@@ -15,25 +16,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setUser, setLoading } = useAuthStore()
   const { theme } = useSettingsStore()
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const settingsBtnRef = useRef(false)
-
-  useEffect(() => {
-    if (!IS_TELEGRAM) return
-
-    const showSettingsBtn = () => {
-      const sb = window.Telegram?.WebApp?.SettingsButton
-      if (!sb && !settingsBtnRef.current) {
-        setTimeout(showSettingsBtn, 500)
-        return
-      }
-      if (sb && !settingsBtnRef.current) {
-        settingsBtnRef.current = true
-        sb.onClick(() => setSettingsOpen(true))
-        sb.show()
-      }
-    }
-    showSettingsBtn()
-  }, [])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -121,6 +103,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+      {IS_TELEGRAM && (
+        <div className="fixed bottom-20 left-4 right-4 z-40 flex gap-2">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex-1 py-3 bg-blue-600 text-white rounded-xl text-sm font-medium shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Settings className="w-4 h-4" /> Настройки
+          </button>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex-1 py-3 bg-white/90 backdrop-blur text-gray-800 rounded-xl text-sm font-medium shadow-lg hover:bg-white transition-colors flex items-center justify-center gap-2"
+          >
+            <Smartphone className="w-4 h-4" /> На экран домой
+          </button>
+        </div>
+      )}
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </>
   )
