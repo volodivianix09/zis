@@ -12,19 +12,29 @@ const IS_LOCAL = typeof window !== 'undefined' && window.location.hostname === '
 const IS_TELEGRAM = typeof window !== 'undefined' && !!window.Telegram?.WebApp
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user: tgUser, isReady, SettingsButton } = useTelegram()
+  const { user: tgUser, isReady } = useTelegram()
   const { setUser, setLoading } = useAuthStore()
   const { theme } = useSettingsStore()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const settingsBtnRef = useRef(false)
 
   useEffect(() => {
-    if (IS_TELEGRAM && SettingsButton && !settingsBtnRef.current) {
-      settingsBtnRef.current = true
-      SettingsButton.onClick(() => setSettingsOpen(true))
-      SettingsButton.show()
+    if (!IS_TELEGRAM) return
+
+    const showSettingsBtn = () => {
+      const sb = window.Telegram?.WebApp?.SettingsButton
+      if (!sb && !settingsBtnRef.current) {
+        setTimeout(showSettingsBtn, 500)
+        return
+      }
+      if (sb && !settingsBtnRef.current) {
+        settingsBtnRef.current = true
+        sb.onClick(() => setSettingsOpen(true))
+        sb.show()
+      }
     }
-  }, [SettingsButton])
+    showSettingsBtn()
+  }, [])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
